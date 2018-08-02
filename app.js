@@ -10,6 +10,7 @@ const middleWare = require('./middleware');
 
 const ReviewService = require('./Services/review.svc');
 const config = require('./config');
+var multer = require('multer');
 
 
 var app = express();
