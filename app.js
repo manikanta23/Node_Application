@@ -11,7 +11,7 @@ const middleWare = require('./middleware');
 const ReviewService = require('./Services/review.svc');
 const config = require('./config');
 var multer = require('multer');
-
+var upload = multer({dest: 'Uploads'});
 
 var app = express();
 app.use(express.json());
@@ -20,6 +20,13 @@ app.use('/api/reviews', reviewRouter);
 
 var port = process.env.port || 3000;
 
+
+
+app.post('/upload',upload.single("image"), (req,res) =>{
+
+    res.status(201);
+    res.send("Uploaded successfully.");
+});
 
 app.use(middleWare.tokenAuth);
 
