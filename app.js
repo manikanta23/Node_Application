@@ -11,8 +11,23 @@ const middleWare = require('./middleware');
 const ReviewService = require('./Services/review.svc');
 const config = require('./config');
 var multer = require('multer');
-var upload = multer({dest: 'Uploads'});
+// var upload = multer({dest: 'Uploads'});
 
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null,'uploads');
+    },
+    filename: function(req, file, cb) {
+        let fileName = Date.now() + "-" + file.originalname;
+        cb(null, filename);
+    }
+});
+
+
+const upload = multer({storage: storage});
+
+
+/////////////////////////////
 var app = express();
 app.use(express.json());
 app.use('/api/users', userRouter);
