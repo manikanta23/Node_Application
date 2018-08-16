@@ -19,7 +19,8 @@ const storage = multer.diskStorage({
     },
     filename: function(req, file, cb) {
         let fileName = Date.now() + "-" + file.originalname;
-        cb(null, filename);
+        req.body.image = fileName;
+        cb(null, fileName);
     }
 });
 
@@ -98,10 +99,11 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 
-app.post('/api/products', (req, res) => {
+app.post('/api/products',upload.single("image"), (req, res) => {
 
-    const { error } = validateCource(req.body);       // Object destructuring 
-    if (error) return res.status(400).send(error.details[0].message);
+    console.log(req.body);
+    // const { error } = validateCource(req.body);       // Object destructuring 
+    // if (error) return res.status(400).send(error.details[0].message);
 
     var product = new Product(req.body);
     // product.save(function(error, savedProduct){
