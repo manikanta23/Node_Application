@@ -1,0 +1,5 @@
+
+{"ip":"::1","url":"/api/products/5b4ddc8980a6b3cad75dd2e7","method":"GET","userAgent":"PostmanRuntime/7.2.0","date":"2018-8-21 17:54:15"}
+{"ip":"::1","url":"/api/products","method":"GET","userAgent":"PostmanRuntime/7.2.0","date":"2018-8-21 17:57:19"}
+{"ip":"::ffff:127.0.0.1","url":"/api/products","method":"GET","userAgent":"PostmanRuntime/7.2.0","date":"2018-8-21 17:58:19"}
+{"ip":"::ffff:127.0.0.1","url":"/api/products","method":"GET","userAgent":"PostmanRuntime/7.2.0","date":"2018-8-21 17:58:41","host":"localhost:3000","responseTime":"900ms","status":200}

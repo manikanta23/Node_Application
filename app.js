@@ -11,6 +11,8 @@ const middleWare = require('./middleware');
 const ReviewService = require('./Services/review.svc');
 const config = require('./config');
 var multer = require('multer');
+const truelog = require('true-log');
+var fs = require('fs');
 // var upload = multer({dest: 'Uploads'});
 
 const storage = multer.diskStorage({
@@ -44,8 +46,15 @@ app.post('/upload',upload.single("image"), (req,res) =>{
     res.send("Uploaded successfully.");
 });
 
+//middleware
 app.use(middleWare.tokenAuth);
+
+//image uplode
 app.use(express.static('Uploads/'));
+
+//File logging
+var ws = fs.createWriteStream(__dirname +"/request.log",{flags: 'a'});
+app.use(truelog({level:'full', stream: ws}));
 
 function getProductById(id) {
     return Product.findById(id).exec();
