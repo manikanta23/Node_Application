@@ -66,7 +66,7 @@ app.get('/api/products', (req, res) => {
             for(let i in products) {
                 let product = products[i];
                 if(product.image) 
-                     product.image = "http://localhost:3000/" + product.image;
+                     product.image = `${req.protocol}://${req.get('host')}/${product.image}`;
             }
             res.status(200).json(products);
         })
@@ -96,6 +96,8 @@ app.get('/api/products/:id', async (req, res) => {
         
         let jsonProduct =  product.toJSON();
         jsonProduct.reviews = reviews;
+        if(jsonProduct.image) 
+            jsonProduct.image = `${req.protocol}://${req.get('host')}/${jsonProduct.image}`;
         res.status(200).send(jsonProduct);
 
     }
