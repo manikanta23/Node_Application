@@ -14,7 +14,7 @@ var multer = require('multer');
 // var upload = multer({dest: 'Uploads'});
 
 const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
+    destination: (req, file, cb) => {
         cb(null,'uploads');
     },
     filename: function(req, file, cb) {
@@ -45,6 +45,7 @@ app.post('/upload',upload.single("image"), (req,res) =>{
 });
 
 app.use(middleWare.tokenAuth);
+app.use(express.static('Uploads/'));
 
 function getProductById(id) {
     return Product.findById(id).exec();
@@ -61,6 +62,12 @@ app.get('/api/products', (req, res) => {
     Product.find()
         .exec()
         .then(function (products) {
+           
+            for(let i in products) {
+                let product = products[i];
+                if(product.image) 
+                     product.image = "http://localhost:3000/" + product.image;
+            }
             res.status(200).json(products);
         })
         .catch(function (err) {
