@@ -4,6 +4,9 @@ const Review = require('../Models/review.model');
 class ReviewService {
 
     get(id) {
+        console.log("id");
+        console.log(id);
+        
         return  Review.find({ productId: id }, { _id: 0 })
             .exec();       
     }
@@ -19,7 +22,7 @@ class ReviewService {
             })
             .catch(function (err) {
                 res.status(500);
-                res.send("Ionternal Server Error");
+                res.send("Internal Server Error");
             });
     }
 

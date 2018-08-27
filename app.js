@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const Product = require('./Models/product.model');
+const Review = require('./Models/review.model');
 const userRouter = require('./Routes/user.router');
 const reviewRouter = require('./Routes/review.router');
 const middleWare = require('./middleware');
@@ -17,9 +18,9 @@ var fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null,'uploads');
+        cb(null, 'uploads');
     },
-    filename: function(req, file, cb) {
+    filename: function (req, file, cb) {
         let fileName = Date.now() + "-" + file.originalname;
         req.body.image = fileName;
         cb(null, fileName);
@@ -27,7 +28,7 @@ const storage = multer.diskStorage({
 });
 
 
-const upload = multer({storage: storage});
+const upload = multer({ storage: storage });
 
 
 /////////////////////////////
@@ -40,7 +41,7 @@ var port = process.env.port || 3000;
 
 
 
-app.post('/upload',upload.single("image"), (req,res) =>{
+app.post('/upload', upload.single("image"), (req, res) => {
 
     res.status(201);
     res.send("Uploaded successfully.");
@@ -53,8 +54,8 @@ app.use(middleWare.tokenAuth);
 app.use(express.static('Uploads/'));
 
 //File logging
-var ws = fs.createWriteStream(__dirname +"/request.log",{flags: 'a'});
-app.use(truelog({level:'full', stream: ws}));
+var ws = fs.createWriteStream(__dirname + "/request.log", { flags: 'a' });
+app.use(truelog({ level: 'full', stream: ws }));
 
 function getProductById(id) {
     return Product.findById(id).exec();
@@ -71,11 +72,11 @@ app.get('/api/products', (req, res) => {
     Product.find()
         .exec()
         .then(function (products) {
-           
-            for(let i in products) {
+
+            for (let i in products) {
                 let product = products[i];
-                if(product.image) 
-                     product.image = `${req.protocol}://${req.get('host')}/${product.image}`;
+                if (product.image)
+                    product.image = `${req.protocol}://${req.get('host')}/${product.image}`;
             }
             res.status(200).json(products);
         })
@@ -102,12 +103,27 @@ app.get('/api/products/:id', async (req, res) => {
         let id = req.params.id;
         let product = await getProductById(id);
         let reviews = await ReviewService.get(id);
-        
-        let jsonProduct =  product.toJSON();
-        jsonProduct.reviews = reviews;
-        if(jsonProduct.image) 
-            jsonProduct.image = `${req.protocol}://${req.get('host')}/${jsonProduct.image}`;
-        res.status(200).send(jsonProduct);
+
+        Review.aggregate(
+            [
+                { $match: { productId: id } },
+                { $group: { _id: '$productId', avgRating: { $avg: '$rating' } } },
+                { $project: { _id: 0 } }
+            ]
+        )
+            .exec()
+            .then(function (result) {
+                let jsonProduct = product.toJSON();
+                jsonProduct.reviews = reviews;
+                if(result && result.length >0)
+                    jsonProduct.avgRating = result[0].avgRating;
+
+                if (jsonProduct.image)
+                    jsonProduct.image = `${req.protocol}://${req.get('host')}/${jsonProduct.image}`;
+                res.status(200).send(jsonProduct);
+            })
+
+
 
     }
     catch (err) {
@@ -117,7 +133,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 
-app.post('/api/products',upload.single("image"), (req, res) => {
+app.post('/api/products', upload.single("image"), (req, res) => {
 
     console.log(req.body);
     // const { error } = validateCource(req.body);       // Object destructuring 

@@ -16,8 +16,9 @@ class ReviewControl {
 
     async get(req, res) {
         try {
-            await ReviewService.get(req.params.id);
-            res.status(200).send("Successfully got the result.");
+          let response =  await ReviewService.get(req.params.id);
+          
+            res.status(200).json(response).send("Successfully got the result.");
 
         } catch(error) {
             console.log(error);
