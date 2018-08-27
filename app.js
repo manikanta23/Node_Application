@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const Product = require('./Models/product.model');
-const Review = require('./Models/review.model');
+
 const userRouter = require('./Routes/user.router');
 const reviewRouter = require('./Routes/review.router');
 const middleWare = require('./middleware');
@@ -88,7 +88,7 @@ app.get('/api/products', (req, res) => {
 });
 
 app.get('/api/products/:id', async (req, res) => {
-    //res.send(cources);
+  
 
     // Product.findById(id)
     // .exec()
@@ -103,28 +103,20 @@ app.get('/api/products/:id', async (req, res) => {
         let id = req.params.id;
         let product = await getProductById(id);
         let reviews = await ReviewService.get(id);
-
-        Review.aggregate(
-            [
-                { $match: { productId: id } },
-                { $group: { _id: '$productId', avgRating: { $avg: '$rating' } } },
-                { $project: { _id: 0 } }
-            ]
-        )
-            .exec()
-            .then(function (result) {
-                let jsonProduct = product.toJSON();
-                jsonProduct.reviews = reviews;
-                if(result && result.length >0)
-                    jsonProduct.avgRating = result[0].avgRating;
-
-                if (jsonProduct.image)
-                    jsonProduct.image = `${req.protocol}://${req.get('host')}/${jsonProduct.image}`;
-                res.status(200).send(jsonProduct);
-            })
+       
+        let jsonProduct = product.toJSON();
+        jsonProduct.reviews = reviews;
 
 
+       let result = await ReviewService.getAverageReviews(id);
+       if(result && result.length >0)
+           jsonProduct.avgRating = result[0].avgRating;
 
+       if (jsonProduct.image)
+           jsonProduct.image = `${req.protocol}://${req.get('host')}/${jsonProduct.image}`;
+    
+           res.status(200).send(jsonProduct);
+      
     }
     catch (err) {
         res.status(500).send("Internam server error");
@@ -140,17 +132,6 @@ app.post('/api/products', upload.single("image"), (req, res) => {
     // if (error) return res.status(400).send(error.details[0].message);
 
     var product = new Product(req.body);
-    // product.save(function(error, savedProduct){
-
-    //     if(error){
-    //         res.status(500);
-    //         res.send("Internal server error");
-
-    //     }else {
-    //         res.status(200);
-    //         res.json(savedProduct);
-    //     }
-    // });
 
     product.save()
         .then(function (productDetaisl) {
@@ -160,17 +141,6 @@ app.post('/api/products', upload.single("image"), (req, res) => {
             res.status(500).send("Internal Server Error");
 
         })
-
-
-
-
-    // const cource = {
-    //     id : cources.length + 1 ,
-    //     name : req.body.name
-    // };
-
-    // cources.push(cource);
-    // res.send(cources);
 });
 
 app.patch('/api/products/:id', (req, res) => {
@@ -256,8 +226,6 @@ app.get('/api/cources/:id', (req, res) => {
 
     if (!cource) return res.status(404).send('No Cource found');
     res.send(cource);
-    // res.send(req.params);
-    //res.send(req.query);
 });
 
 function validateCource(cource) {
